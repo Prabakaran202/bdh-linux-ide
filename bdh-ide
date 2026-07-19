@@ -1,17 +1,30 @@
 #!/bin/bash
 
 SESSION="archide"
-# Global Config Path ஆக மாற்றப்பட்டுள்ளது
-CONFIG_DIR="/etc/bdh-ide" 
+CONFIG_DIR="/etc/bdh-ide"
+
+# =========================================================
+# ⚙️ CUSTOM WINDOW SIZES (அளவுகளை இங்கு மாற்றிக்கொள்ளலாம்)
+# அளவுகளை சதவீதத்தில் (Percentage 1-100) கொடுக்கவும்
+# =========================================================
+
+TERMINAL_HEIGHT=40   # கீழே உள்ள Terminal-இன் உயரம் (உதாரணம்: 40%)
+NANO_WIDTH=50        # வலதுபுறம் உள்ள Nano-வின் அகலம் (உதாரணம்: 50%)
+
+# குறிப்பு: Nano அகலத்தைக் குறைத்தால், இடதுபுறமுள்ள Ranger-ன் அகலம் தானாக அதிகரிக்கும்.
+# =========================================================
 
 tmux has-session -t $SESSION 2>/dev/null
 
 if [ $? != 0 ]; then
     tmux -f "$CONFIG_DIR/tmux.conf" new-session -d -s $SESSION
 
-    tmux split-window -v -p 40
+    # 1. திரையை மேலேயும் கீழேயுமாகப் பிரிக்கிறோம் (Terminal Height)
+    tmux split-window -v -p $TERMINAL_HEIGHT
     tmux select-pane -t 0
-    tmux split-window -h -p 50
+
+    # 2. மேலேயுள்ள பகுதியை இடது (Ranger), வலது (Nano) எனப் பிரிக்கிறோம் (Nano Width)
+    tmux split-window -h -p $NANO_WIDTH
 
     # Ranger (Top-Left)
     tmux select-pane -t 0
