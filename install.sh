@@ -21,16 +21,27 @@ fi
 INSTALL_DIR="/usr/local/bin"
 CONFIG_DIR="/etc/bdh-ide"
 
+# Directories உருவாக்குதல்
 mkdir -p "$INSTALL_DIR"
 mkdir -p "$CONFIG_DIR"
 
 # 1. Main executable-ஐ காப்பி செய்தல்
+echo "Executable ஃபைல் செட் செய்யப்படுகிறது..."
 cp bdh-ide "$INSTALL_DIR/bdh-ide"
+
+# பயனர் வேறு எங்காவது காப்பி செய்திருந்தால் ஏற்படும் \r (Windows line endings) பிழையை ஆட்டோமேட்டிக்காக நீக்க
+sed -i 's/\r$//' "$INSTALL_DIR/bdh-ide"
+
+# ஆட்டோமேட்டிக்காக Execute Permission கொடுப்பதற்கு
 chmod +x "$INSTALL_DIR/bdh-ide"
 
 # 2. Configuration file-களை காப்பி செய்தல்
+echo "Config ஃபைல்கள் காப்பி செய்யப்படுகின்றன..."
 cp configs/tmux.conf "$CONFIG_DIR/tmux.conf"
 cp configs/nanorc "$CONFIG_DIR/nanorc"
+
+# Config ஃபைல்களுக்கு அனைவருக்கும் படிக்கும் (Read) உரிமை கொடுக்க
+chmod -R 755 "$CONFIG_DIR"
 
 echo "Global இன்ஸ்டாலேஷன் வெற்றிகரமாக முடிந்தது!"
 echo "இப்போது சிஸ்டமில் யார் வேண்டுமானாலும் எந்த போல்டரில் இருந்தும் 'bdh-ide' என டைப் செய்து திறக்கலாம்."
