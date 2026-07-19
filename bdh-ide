@@ -1,0 +1,28 @@
+#!/bin/bash
+
+SESSION="archide"
+# Global Config Path ஆக மாற்றப்பட்டுள்ளது
+CONFIG_DIR="/etc/bdh-ide" 
+
+tmux has-session -t $SESSION 2>/dev/null
+
+if [ $? != 0 ]; then
+    tmux -f "$CONFIG_DIR/tmux.conf" new-session -d -s $SESSION
+
+    tmux split-window -v -p 40
+    tmux select-pane -t 0
+    tmux split-window -h -p 50
+
+    # Ranger (Top-Left)
+    tmux select-pane -t 0
+    tmux send-keys "ranger" C-m
+
+    # Nano (Top-Right)
+    tmux select-pane -t 1
+    tmux send-keys "nano -f $CONFIG_DIR/nanorc" C-m
+
+    # Main Terminal (Bottom)
+    tmux select-pane -t 2
+fi
+
+tmux attach -t $SESSION
