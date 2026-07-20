@@ -4,37 +4,50 @@ SESSION="archide"
 CONFIG_DIR="/etc/bdh-ide"
 
 # =========================================================
-# ⚙️ CUSTOM WINDOW SIZES (அளவுகளை இங்கு மாற்றிக்கொள்ளலாம்)
-# அளவுகளை சதவீதத்தில் (Percentage 1-100) கொடுக்கவும்
+# ⚙️ CUSTOM WINDOW SIZES
+# =========================================================
+TERMINAL_HEIGHT=40
+NANO_WIDTH=50
 # =========================================================
 
-TERMINAL_HEIGHT=40   # கீழே உள்ள Terminal-இன் உயரம் (உதாரணம்: 40%)
-NANO_WIDTH=50        # வலதுபுறம் உள்ள Nano-வின் அகலம் (உதாரணம்: 50%)
+# அப்டேட் செய்யப்பட்ட Wrapper Script (Nano-வில் திறப்பது + Terminal-ல் Path மாற்றுவது)
+WRAPPER="/tmp/bdh-nano-wrapper.sh"
+cat <<EOF > $WRAPPER
+#!/bin/bash
+[ "\$1" == "--" ] && shift
 
-# குறிப்பு: Nano அகலத்தைக் குறைத்தால், இடதுபுறமுள்ள Ranger-ன் அகலம் தானாக அதிகரிக்கும்.
-# =========================================================
+FILE_PATH="\$1"
+DIR_PATH=\$(dirname "\$FILE_PATH")
+
+# 1. Nano டேப்பில் (Pane 1) ஃபைலை ஓபன் செய்ய
+tmux send-keys -t 1 C-c "nano -f $CONFIG_DIR/nanorc \"\$FILE_PATH\"" C-m
+
+# 2. கீழே உள்ள Terminal டேப்பில் (Pane 2) Path-ஐ மாற்றி (cd), ls கமாண்டை ரன் செய்ய
+tmux send-keys -t 2 C-c "cd \"\$DIR_PATH\" && clear && ls" C-m
+
+# 3. கர்சரை மீண்டும் Nano-வுக்கு மாற்ற
+tmux select-pane -t 1
+EOF
+chmod +x $WRAPPER
 
 tmux has-session -t $SESSION 2>/dev/null
 
 if [ $? != 0 ]; then
     tmux -f "$CONFIG_DIR/tmux.conf" new-session -d -s $SESSION
 
-    # 1. திரையை மேலேயும் கீழேயுமாகப் பிரிக்கிறோம் (Terminal Height)
     tmux split-window -v -p $TERMINAL_HEIGHT
     tmux select-pane -t 0
-
-    # 2. மேலேயுள்ள பகுதியை இடது (Ranger), வலது (Nano) எனப் பிரிக்கிறோம் (Nano Width)
     tmux split-window -h -p $NANO_WIDTH
 
-    # Ranger (Top-Left)
+    # 1. Ranger (Top-Left)
     tmux select-pane -t 0
-    tmux send-keys "ranger" C-m
+    tmux send-keys "export DISPLAY=''; export WAYLAND_DISPLAY=''; export EDITOR=$WRAPPER; clear; ranger" C-m
 
-    # Nano (Top-Right)
+    # 2. Nano Tab (Top-Right)
     tmux select-pane -t 1
-    tmux send-keys "nano -f $CONFIG_DIR/nanorc" C-m
+    tmux send-keys "clear; echo -e '\n  \e[1;32mBDH IDE-க்கு வரவேற்கிறோம்!\e[0m\n  Ranger-ல் ஒரு ஃபைலை \e[1;33mEnter\e[0m செய்தால் அது இங்கே ஓபன் ஆகும்.\n  மேலும், கீழே உள்ள Terminal-லும் \e[1;36mPath தானாக மாறும்!\e[0m\n'" C-m
 
-    # Main Terminal (Bottom)
+    # 3. Main Terminal (Bottom)
     tmux select-pane -t 2
 fi
 
