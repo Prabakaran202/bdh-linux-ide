@@ -1,0 +1,9 @@
+set tabsize 4
+set tabstospaces
+set linenumbers
+set mouse
+set smooth
+syntax "python" "\.py$"
+color green "def .*"
+color yellow "import .*"
+color cyan "print\(.*\)"
