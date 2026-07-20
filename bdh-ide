@@ -1,27 +1,65 @@
 #!/bin/bash
+# BDH IDE — Final merged launcher (ranger + nano + terminal, tmux based)
 
 SESSION="archide"
 CONFIG_DIR="/etc/bdh-ide"
 
-# ஏற்கனவே ஓடிக்கொண்டிருக்கும் Tmux செஷனை செக் செய்து நீக்குதல்
-if tmux has-session -t $SESSION 2>/dev/null; then
-    tmux kill-session -t $SESSION
-fi
+# =========================================================
+# ⚙️ CUSTOM WINDOW SIZES
+# =========================================================
+TERMINAL_HEIGHT=40   # bottom terminal pane height %
+NANO_WIDTH=50        # nano pane width %
+# =========================================================
 
-# Nesting எரர் வராமல் இருக்க TMUX வேரியபிளை தற்காலிகமாக நீக்குகிறோம்
+WRAPPER="/tmp/bdh-nano-wrapper.sh"
+
+# Nesting error varaama irukka, already inside tmux na TMUX var-a unset pannurom
 unset TMUX
 
-# 1. புதிய செஷனை உருவாக்குதல்
-tmux new-session -d -s $SESSION -n "BDH-IDE"
+# --- Wrapper script generate pannurom (ella run-lum fresh-a create aagum) ---
+cat <<EOF > "$WRAPPER"
+#!/bin/bash
+[ "\$1" == "--" ] && shift
 
-# 2. விண்டோக்களை ஸ்பிளிட் செய்தல்
-tmux split-window -v -p 40 -t $SESSION
-tmux select-pane -t $SESSION:0.0
-tmux split-window -h -p 50 -t $SESSION:0.0
+FILE_PATH="\$1"
+DIR_PATH=\$(dirname "\$FILE_PATH")
 
-# 3. Ranger மற்றும் Nano விண்டோக்களை அமைத்தல்
-tmux send-keys -t $SESSION:0.0 "export EDITOR=/tmp/bdh-nano-wrapper.sh; clear; ranger" C-m
-tmux send-keys -t $SESSION:0.1 "clear; echo -e '\n  \e[1;32mBDH IDE Ready!\e[0m'" C-m
+# 1. Nano pane-la (pane 1) file open pannurom
+tmux send-keys -t 1 C-c "nano -f $CONFIG_DIR/nanorc \"\$FILE_PATH\"" C-m
 
-# 4. செஷனை அட்டாச் செய்தல்
-tmux attach -t $SESSION
+# 2. Terminal pane-la (pane 2) andha file-oda dir-ku cd pannurom
+tmux send-keys -t 2 C-c "cd \"\$DIR_PATH\" && clear && ls" C-m
+
+# 3. Cursor-a Nano-kku thirumba mathurom
+tmux select-pane -t 1
+EOF
+chmod +x "$WRAPPER"
+
+# --- Session already irundha, adha kill pannitu fresh-a start pandrom ---
+if tmux has-session -t "$SESSION" 2>/dev/null; then
+    tmux kill-session -t "$SESSION"
+fi
+
+# --- Puthu session + 3-pane layout create pandrom ---
+tmux new-session -d -s "$SESSION" -n "BDH-IDE"
+
+tmux split-window -v -p "$TERMINAL_HEIGHT" -t "$SESSION"
+tmux select-pane -t "$SESSION:0.0"
+tmux split-window -h -p "$NANO_WIDTH" -t "$SESSION:0.0"
+
+# Pane 0 = Ranger (top-left), Pane 1 = Nano (top-right), Pane 2 = Terminal (bottom)
+
+# 1. Ranger pane
+tmux select-pane -t "$SESSION:0.0"
+tmux send-keys -t "$SESSION:0.0" \
+    "export DISPLAY=''; export WAYLAND_DISPLAY=''; export EDITOR=$WRAPPER; clear; ranger" C-m
+
+# 2. Nano welcome pane
+tmux select-pane -t "$SESSION:0.1"
+tmux send-keys -t "$SESSION:0.1" \
+    "clear; echo -e '\n  \e[1;32mBDH IDE-க்கு வரவேற்கிறோம்!\e[0m\n  Ranger-ல் ஒரு ஃபைலை \e[1;33mEnter\e[0m செய்தால் அது இங்கே ஓபன் ஆகும்.\n  மேலும், கீழே உள்ள Terminal-லும் \e[1;36mPath தானாக மாறும்!\e[0m\n'" C-m
+
+# 3. Main terminal pane — focus here on start
+tmux select-pane -t "$SESSION:0.2"
+
+tmux attach -t "$SESSION"
