@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# =========================================================
+# Safety Lock: ஏற்கனவே Tmux-ல் இருந்தால் தடுத்துவிடுவது
+# =========================================================
+if [ -n "$TMUX" ]; then
+    echo -e "\e[1;31m❌ பிழை: நீங்கள் ஏற்கனவே ஒரு Tmux செஷனுக்குள் உள்ளீர்கள்!\e[0m"
+    echo -e "\e[1;33m💡 'exit' என்று டைப் செய்து வெளியேறிய பின் மீண்டும் 'bdh-ide' என ரன் செய்யவும்.\e[0m"
+    exit 1
+fi
+# =========================================================
+
 SESSION="archide"
 CONFIG_DIR="/etc/bdh-ide"
 
@@ -9,7 +19,7 @@ tmux has-session -t $SESSION 2>/dev/null
 # செஷன் இல்லை என்றால் (Python-ன் if os.system(...) != 0 லாஜிக்)
 if [ $? != 0 ]; then
     echo -e "\e[1;32m🚀 [BDH IDE] Launching Workspace with Tamizhi...\e[0m"
-    
+
     # 1. Wrapper Script உருவாக்கம் (Ranger -> Nano வசதிக்காக)
     WRAPPER="/tmp/bdh-nano-wrapper.sh"
     cat <<EOF > $WRAPPER
