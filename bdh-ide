@@ -25,10 +25,14 @@ FILE_PATH="\$1"
 DIR_PATH=\$(dirname "\$FILE_PATH")
 
 # 1. Nano pane-la (pane 1) file open pannurom
-tmux send-keys -t 1 C-c "nano -f $CONFIG_DIR/nanorc \"\$FILE_PATH\"" C-m
+tmux send-keys -t 1 C-c
+sleep 0.1
+tmux send-keys -t 1 "nano -f $CONFIG_DIR/nanorc \"\$FILE_PATH\"" C-m
 
 # 2. Terminal pane-la (pane 2) andha file-oda dir-ku cd pannurom
-tmux send-keys -t 2 C-c "cd \"\$DIR_PATH\" && clear && ls" C-m
+tmux send-keys -t 2 C-c
+sleep 0.1
+tmux send-keys -t 2 "cd \"\$DIR_PATH\" && clear && ls" C-m
 
 # 3. Cursor-a Nano-kku thirumba mathurom
 tmux select-pane -t 1
