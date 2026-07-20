@@ -3,56 +3,33 @@
 SESSION="archide"
 CONFIG_DIR="/etc/bdh-ide"
 
-# =========================================================
-# ⚙️ CUSTOM WINDOW SIZES
-# =========================================================
-TERMINAL_HEIGHT=40
-NANO_WIDTH=50
-# =========================================================
+# Tmux செஷன் இருக்கிறதா என செக் செய்கிறோம்
+tmux has-session -t $SESSION 2>/dev/null
 
-# அப்டேட் செய்யப்பட்ட Wrapper Script (Zsh Timing Fix சேர்க்கப்பட்டுள்ளது)
-WRAPPER="/tmp/bdh-nano-wrapper.sh"
-cat <<EOF > $WRAPPER
+# செஷன் இல்லை என்றால் (Python-ன் if os.system(...) != 0 லாஜிக்)
+if [ $? != 0 ]; then
+    echo -e "\e[1;32m🚀 [BDH IDE] Launching Workspace with Tamizhi...\e[0m"
+    
+    # 1. Wrapper Script உருவாக்கம் (Ranger -> Nano வசதிக்காக)
+    WRAPPER="/tmp/bdh-nano-wrapper.sh"
+    cat <<EOF > $WRAPPER
 #!/bin/bash
 [ "\$1" == "--" ] && shift
-
 FILE_PATH="\$1"
 DIR_PATH=\$(dirname "\$FILE_PATH")
-
-# 1. Nano டேப்பில் (Pane 1) ஃபைலை ஓபன் செய்ய
 tmux send-keys -t 1 C-c
 sleep 0.1
 tmux send-keys -t 1 "nano -f $CONFIG_DIR/nanorc \"\$FILE_PATH\"" C-m
-
-# 2. கீழே உள்ள Terminal டேப்பில் (Pane 2) Path-ஐ மாற்றி (cd), ls கமாண்டை ரன் செய்ய
 tmux send-keys -t 2 C-c
 sleep 0.1
 tmux send-keys -t 2 "cd \"\$DIR_PATH\" && clear && ls" C-m
-
-# 3. கர்சரை மீண்டும் Nano-வுக்கு மாற்ற
 tmux select-pane -t 1
 EOF
-chmod +x $WRAPPER
+    chmod +x $WRAPPER
 
-tmux has-session -t $SESSION 2>/dev/null
-
-if [ $? != 0 ]; then
-    tmux -f "$CONFIG_DIR/tmux.conf" new-session -d -s $SESSION
-
-    tmux split-window -v -p $TERMINAL_HEIGHT
-    tmux select-pane -t 0
-    tmux split-window -h -p $NANO_WIDTH
-
-    # 1. Ranger (Top-Left)
-    tmux select-pane -t 0
-    tmux send-keys "export DISPLAY=''; export WAYLAND_DISPLAY=''; export EDITOR=$WRAPPER; clear; ranger" C-m
-
-    # 2. Nano Tab (Top-Right)
-    tmux select-pane -t 1
-    tmux send-keys "clear; echo -e '\n  \e[1;32mBDH IDE-க்கு வரவேற்கிறோம்!\e[0m\n  Ranger-ல் ஒரு ஃபைலை \e[1;33mEnter\e[0m செய்தால் அது இங்கே ஓபன் ஆகும்.\n  மேலும், கீழே உள்ள Terminal-லும் \e[1;36mPath தானாக மாறும்!\e[0m\n'" C-m
-
-    # 3. Main Terminal (Bottom)
-    tmux select-pane -t 2
+    # 2. உங்களின் தமிழி ஸ்கிரிப்ட்டைக் கால் செய்கிறோம்!
+    tamizhi run "$CONFIG_DIR/ide_layout.tz"
 fi
 
+# இறுதியாக செஷனை ஓபன் செய்கிறோம்
 tmux attach -t $SESSION
