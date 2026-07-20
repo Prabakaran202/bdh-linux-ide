@@ -1,10 +1,27 @@
 #!/bin/bash
 
-# 1. Safety Check (இது மட்டும் bash-ல் இருக்கட்டும்)
-if [ -n "$TMUX" ]; then exit 1; fi
+SESSION="archide"
+CONFIG_DIR="/etc/bdh-ide"
 
-# 2. தமிழி மொழியை இயக்குதல் (மற்ற அனைத்து வேலைகளும் இதனுள்)
-tamizhi run /etc/bdh-ide/ide_layout.tz
+# ஏற்கனவே ஓடிக்கொண்டிருக்கும் Tmux செஷனை செக் செய்து நீக்குதல்
+if tmux has-session -t $SESSION 2>/dev/null; then
+    tmux kill-session -t $SESSION
+fi
 
-# 3. இறுதியாக செஷனை இணைத்தல்
-tmux attach -t archide
+# Nesting எரர் வராமல் இருக்க TMUX வேரியபிளை தற்காலிகமாக நீக்குகிறோம்
+unset TMUX
+
+# 1. புதிய செஷனை உருவாக்குதல்
+tmux new-session -d -s $SESSION -n "BDH-IDE"
+
+# 2. விண்டோக்களை ஸ்பிளிட் செய்தல்
+tmux split-window -v -p 40 -t $SESSION
+tmux select-pane -t $SESSION:0.0
+tmux split-window -h -p 50 -t $SESSION:0.0
+
+# 3. Ranger மற்றும் Nano விண்டோக்களை அமைத்தல்
+tmux send-keys -t $SESSION:0.0 "export EDITOR=/tmp/bdh-nano-wrapper.sh; clear; ranger" C-m
+tmux send-keys -t $SESSION:0.1 "clear; echo -e '\n  \e[1;32mBDH IDE Ready!\e[0m'" C-m
+
+# 4. செஷனை அட்டாச் செய்தல்
+tmux attach -t $SESSION
