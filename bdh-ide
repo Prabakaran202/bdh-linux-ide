@@ -40,8 +40,8 @@ if tmux has-session -t "$SESSION" 2>/dev/null; then
     tmux kill-session -t "$SESSION"
 fi
 
-# --- Puthu session + 3-pane layout create pandrom ---
-tmux new-session -d -s "$SESSION" -n "BDH-IDE"
+# --- Puthu session + 3-pane layout create pandrom (tmux.conf இணைக்கப்பட்டுள்ளது) ---
+tmux -f "$CONFIG_DIR/tmux.conf" new-session -d -s "$SESSION" -n "BDH-IDE"
 
 tmux split-window -v -p "$TERMINAL_HEIGHT" -t "$SESSION"
 tmux select-pane -t "$SESSION:0.0"
