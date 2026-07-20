@@ -6,4 +6,3 @@ fzf
 bat
 eza
 git
-ano
