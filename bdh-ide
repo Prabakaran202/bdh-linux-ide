@@ -7,8 +7,8 @@ CONFIG_DIR="/etc/bdh-ide"
 # =========================================================
 # ⚙️ CUSTOM WINDOW SIZES
 # =========================================================
-TERMINAL_HEIGHT=40   # bottom terminal pane height %
-NANO_WIDTH=50        # nano pane width %
+NANO_WIDTH=70        # Nano வலதுபுறம் எடுக்கும் இடம் (70%)
+TERMINAL_HEIGHT=40   # Terminal இடதுபுறம் கீழே எடுக்கும் இடம் (40%)
 # =========================================================
 
 WRAPPER="/tmp/bdh-nano-wrapper.sh"
@@ -24,18 +24,18 @@ cat <<EOF > "$WRAPPER"
 FILE_PATH="\$1"
 DIR_PATH=\$(dirname "\$FILE_PATH")
 
-# 1. Nano pane-la (pane 1) file open pannurom
-tmux send-keys -t 1 C-c
-sleep 0.1
-tmux send-keys -t 1 "nano -f $CONFIG_DIR/nanorc \"\$FILE_PATH\"" C-m
-
-# 2. Terminal pane-la (pane 2) andha file-oda dir-ku cd pannurom
+# 1. Nano pane-la (pane 2 - வலதுபுறம்) file open pannurom
 tmux send-keys -t 2 C-c
 sleep 0.1
-tmux send-keys -t 2 "cd \"\$DIR_PATH\" && clear && ls" C-m
+tmux send-keys -t 2 "nano \"\$FILE_PATH\"" C-m
+
+# 2. Terminal pane-la (pane 1 - இடதுபுறம் கீழே) andha file-oda dir-ku cd pannurom
+tmux send-keys -t 1 C-c
+sleep 0.1
+tmux send-keys -t 1 "cd \"\$DIR_PATH\" && clear && ls" C-m
 
 # 3. Cursor-a Nano-kku thirumba mathurom
-tmux select-pane -t 1
+tmux select-pane -t 2
 EOF
 chmod +x "$WRAPPER"
 
@@ -47,23 +47,29 @@ fi
 # --- Puthu session + 3-pane layout create pandrom (tmux.conf இணைக்கப்பட்டுள்ளது) ---
 tmux -f "$CONFIG_DIR/tmux.conf" new-session -d -s "$SESSION" -n "BDH-IDE"
 
-tmux split-window -v -p "$TERMINAL_HEIGHT" -t "$SESSION"
+# 1. முதலில் திரையை இடது / வலதாகப் பிரிக்கிறோம் (வலதுபுறம் Nano 70%)
+tmux split-window -h -p "$NANO_WIDTH" -t "$SESSION"
+
+# 2. இடதுபுறம் உள்ள பேனை (Pane 0) மேலேயும் கீழேயும் பிரிக்கிறோம் (கீழே Terminal 40%)
 tmux select-pane -t "$SESSION:0.0"
-tmux split-window -h -p "$NANO_WIDTH" -t "$SESSION:0.0"
+tmux split-window -v -p "$TERMINAL_HEIGHT" -t "$SESSION:0.0"
 
-# Pane 0 = Ranger (top-left), Pane 1 = Nano (top-right), Pane 2 = Terminal (bottom)
+# இப்போது பேன்கள் (Panes) வரிசை:
+# 0 = Ranger (இடதுபுறம் மேலே)
+# 1 = Terminal (இடதுபுறம் கீழே)
+# 2 = Nano (வலதுபுறம் முழுவதும்)
 
-# 1. Ranger pane
+# 1. Ranger pane (Pane 0)
 tmux select-pane -t "$SESSION:0.0"
 tmux send-keys -t "$SESSION:0.0" \
     "export DISPLAY=''; export WAYLAND_DISPLAY=''; export EDITOR=$WRAPPER; clear; ranger" C-m
 
-# 2. Nano welcome pane
-tmux select-pane -t "$SESSION:0.1"
-tmux send-keys -t "$SESSION:0.1" \
-    "clear; echo -e '\n  \e[1;32mBDH IDE-க்கு வரவேற்கிறோம்!\e[0m\n  Ranger-ல் ஒரு ஃபைலை \e[1;33mEnter\e[0m செய்தால் அது இங்கே ஓபன் ஆகும்.\n  மேலும், கீழே உள்ள Terminal-லும் \e[1;36mPath தானாக மாறும்!\e[0m\n'" C-m
-
-# 3. Main terminal pane — focus here on start
+# 2. Nano welcome pane (Pane 2 - வலதுபுறம்)
 tmux select-pane -t "$SESSION:0.2"
+tmux send-keys -t "$SESSION:0.2" \
+    "clear; echo -e '\n  \e[1;32mBDH IDE-க்கு வரவேற்கிறோம்!\e[0m\n  Ranger-ல் ஒரு ஃபைலை \e[1;33mEnter\e[0m செய்தால் அது இங்கே ஓபன் ஆகும்.\n  மேலும், இடதுபுறம் உள்ள Terminal-லும் \e[1;36mPath தானாக மாறும்!\e[0m\n'" C-m
+
+# 3. Main terminal pane (Pane 1 - இடதுபுறம் கீழே) - Cursor இங்கு நிற்கும்
+tmux select-pane -t "$SESSION:0.1"
 
 tmux attach -t "$SESSION"
