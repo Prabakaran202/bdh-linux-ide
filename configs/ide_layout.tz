@@ -6,14 +6,11 @@ main {
     call tmux select-pane -t 0 ;
     call tmux split-window -h -p 50 ;
 
-    // 1. Pane 0: Ranger ஓபன் செய்தல்
-    call tmux select-pane -t 0 ;
-    // ஒவ்வொரு கமாண்டையும் தனித்தனி call-ஆகப் பிரிப்பதுதான் பாதுகாப்பானது
-    call tmux send-keys export EDITOR=/tmp/bdh-nano-wrapper.sh C-m ;
-    call tmux send-keys clear C-m ;
-    call tmux send-keys ranger C-m ;
+    // 1. Pane 0 (Top-Left): Ranger ஓபன் செய்தல்
+    call tmux send-keys -t 0 export EDITOR=/tmp/bdh-nano-wrapper.sh C-m ;
+    call tmux send-keys -t 0 clear C-m ;
+    call tmux send-keys -t 0 ranger C-m ;
 
-    // 2. Pane 2: Terminal ரெடி செய்தல்
-    call tmux select-pane -t 2 ;
-    call tmux send-keys clear C-m ;
+    // 2. Pane 2 (Bottom): Terminal ரெடி செய்தல்
+    call tmux send-keys -t 2 clear C-m ;
 }
