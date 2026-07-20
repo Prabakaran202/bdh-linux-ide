@@ -1,16 +1,17 @@
 main {
-    call tmux -f /etc/bdh-ide/tmux.conf new-session -d -s archide ;
+    // Session setup
+    call tmux new-session -d -s archide ;
 
-    // விண்டோக்களைப் பிரித்தல்
+    // Window Layout
     call tmux split-window -v -p 30 ;
-    call tmux select-pane -t 0 ;
     call tmux split-window -h -p 50 ;
 
-    // 1. Pane 0 (Top-Left): Ranger ஓபன் செய்தல்
-    call tmux send-keys -t 0 export EDITOR=/tmp/bdh-nano-wrapper.sh C-m ;
-    call tmux send-keys -t 0 clear C-m ;
+    // pane 0 - Ranger
     call tmux send-keys -t 0 ranger C-m ;
 
-    // 2. Pane 2 (Bottom): Terminal ரெடி செய்தல்
-    call tmux send-keys -t 2 clear C-m ;
+    // pane 1 - Nano (Wrapper மூலமாக)
+    call tmux send-keys -t 1 nano C-m ;
+
+    // pane 2 - Terminal
+    call tmux select-pane -t 2 ;
 }
