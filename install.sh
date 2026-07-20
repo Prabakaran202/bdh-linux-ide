@@ -35,7 +35,19 @@ sed -i 's/\r$//' "$INSTALL_DIR/bdh-ide"
 # ஆட்டோமேட்டிக்காக Execute Permission கொடுப்பதற்கு
 chmod +x "$INSTALL_DIR/bdh-ide"
 
-# 2. Configuration file-களை காப்பி செய்தல்
+# =========================================================
+# 2. bdh-ide-kill கமாண்டை உருவாக்குதல் (புதிதாக சேர்க்கப்பட்டது)
+# =========================================================
+echo "Kill கமாண்ட் உருவாக்கப்படுகிறது..."
+cat << 'EOF' > "$INSTALL_DIR/bdh-ide-kill"
+#!/bin/bash
+tmux kill-server 2>/dev/null
+echo -e "\e[1;32mBDH IDE செஷன்கள் வெற்றிகரமாக நிறுத்தப்பட்டன!\e[0m"
+EOF
+chmod +x "$INSTALL_DIR/bdh-ide-kill"
+# =========================================================
+
+# 3. Configuration file-களை காப்பி செய்தல்
 echo "Config ஃபைல்கள் காப்பி செய்யப்படுகின்றன..."
 cp configs/tmux.conf "$CONFIG_DIR/tmux.conf"
 cp configs/nanorc "$CONFIG_DIR/nanorc"
@@ -43,5 +55,16 @@ cp configs/nanorc "$CONFIG_DIR/nanorc"
 # Config ஃபைல்களுக்கு அனைவருக்கும் படிக்கும் (Read) உரிமை கொடுக்க
 chmod -R 755 "$CONFIG_DIR"
 
+# 4. பழைய Tmux செஷனை அழித்தல் (புதிய அப்டேட்கள் உடனடியாக வேலை செய்ய)
+echo "பழைய செஷன்கள் ரீசெட் செய்யப்படுகின்றன..."
+if [ -n "$SUDO_USER" ]; then
+    sudo -u $SUDO_USER tmux kill-server 2>/dev/null
+else
+    tmux kill-server 2>/dev/null
+fi
+
 echo "Global இன்ஸ்டாலேஷன் வெற்றிகரமாக முடிந்தது!"
-echo "இப்போது சிஸ்டமில் யார் வேண்டுமானாலும் எந்த போல்டரில் இருந்தும் 'bdh-ide' என டைப் செய்து திறக்கலாம்."
+echo "---------------------------------------------------"
+echo "✅ IDE-ஐ திறக்க: bdh-ide"
+echo "✅ IDE-ஐ முழுமையாக மூட: bdh-ide-kill"
+echo "---------------------------------------------------"
