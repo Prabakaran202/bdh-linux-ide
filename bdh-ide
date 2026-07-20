@@ -38,7 +38,8 @@ EOF
     chmod +x $WRAPPER
 
     # 2. உங்களின் தமிழி ஸ்கிரிப்ட்டைக் கால் செய்கிறோம்!
-    TMUX=''tamizhi run "$CONFIG_DIR/ide_layout.tz"
+    TMUX='' tamizhi run "$CONFIG_DIR/ide_layout.tz"
+    sleep 1
 fi
 
 # இறுதியாக செஷனை ஓபன் செய்கிறோம்
