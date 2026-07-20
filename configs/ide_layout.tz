@@ -1,0 +1,11 @@
+main {
+    // BDH IDE விண்டோக்களை உருவாக்கும் கமாண்டுகள்
+    call "tmux -f /etc/bdh-ide/tmux.conf new-session -d -s archide" ;
+    call "tmux split-window -v -p 40" ;
+    call "tmux select-pane -t 0" ;
+    call "tmux split-window -h -p 50" ;
+
+    // Ranger மற்றும் Nano-வை ஓபன் செய்தல்
+    call "tmux select-pane -t 0" ;
+    call "tmux send-keys \"export EDITOR=/tmp/bdh-nano-wrapper.sh; clear; ranger\" C-m" ;
+}
