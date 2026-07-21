@@ -35,4 +35,9 @@ sudo ./install.sh
 ​F4: Force close the IDE session safely.
 
 </pre>
+## 👤 Author
+
+Developed by **Prabakaran**  
+*Backenddeveloperhub*
+
 
