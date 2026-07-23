@@ -6,3 +6,4 @@ fzf
 bat
 eza
 git
+cage
