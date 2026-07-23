@@ -1,13 +1,13 @@
 # Maintainer: Prabakaran (bdh) 
 
 pkgname=bdh-linux-ide
-pkgver=1.0.0
+pkgver=1.0.1
 pkgrel=1
 pkgdesc="A simple, lightweight terminal-based IDE using Tmux, Ranger, and Nano."
 arch=('any')
 url="https://github.com/BackendDeveloperHub/bdh-linux-ide"
 license=('GNU General Public License')
-depends=('tmux' 'ranger' 'nano' 'bash')
+depends=('tmux' 'ranger' 'nano' 'bash' 'cage' 'xorg-xwayland' 'firefox')
 source=("git+$url.git")
 sha256sums=('SKIP')
 
@@ -21,6 +21,7 @@ package() {
   # Executable ஃபைல்களை இன்ஸ்டால் செய்ய
   install -Dm755 bdh-ide "$pkgdir/usr/bin/bdh-ide"
   install -Dm755 bdh-ide-kill "$pkgdir/usr/bin/bdh-ide-kill"
+  install -Dm755 bdh-browser "$pkgdir/usr/bin/bdh-browser"
 
   # Config ஃபைல்களை இன்ஸ்டால் செய்ய
   install -Dm644 configs/tmux.conf "$pkgdir/etc/bdh-ide/tmux.conf"
