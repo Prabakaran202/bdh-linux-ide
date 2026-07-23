@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# பயனர் URL கொடுத்தால் அதை எடுக்கவும், இல்லை என்றால் சாதாரணமாகத் திறக்கவும்
+URL="${1:-}"
+
+echo "Starting minimal GUI browser session..."
+
+# Cage மூலமாக Firefox-ஐத் திறக்க
+if [ -z "$URL" ]; then
+    cage -- firefox
+else
+    cage -- firefox "$URL"
+fi
+
+echo "Browser session closed. Back to BDH IDE."
