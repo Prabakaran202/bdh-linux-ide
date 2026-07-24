@@ -1,15 +1,17 @@
 #!/bin/bash
 
-# பயனர் URL கொடுத்தால் அதை எடுக்கவும், இல்லை என்றால் சாதாரணமாகத் திறக்கவும்
 URL="${1:-}"
 
 echo "Starting minimal GUI browser session..."
+echo "Detecting HDMI and configuring display via wlr-randr..."
 
-# Cage மூலமாக Firefox-ஐத் திறக்க
+# Cage-க்குள் ரன் ஆவதற்காக sh -c பயன்படுத்துகிறோம்.
+# 1. wlr-randr மூலம் HDMI-A-1 ஆக்டிவேட் செய்யப்படும்.
+# 2. அதன் பிறகு Firefox திறக்கப்படும்.
 if [ -z "$URL" ]; then
-    cage -- firefox
+    cage -- sh -c "wlr-randr --output HDMI-A-1 --on 2>/dev/null; exec firefox"
 else
-    cage -- firefox "$URL"
+    cage -- sh -c "wlr-randr --output HDMI-A-1 --on 2>/dev/null; exec firefox \"$URL\""
 fi
 
 echo "Browser session closed. Back to BDH IDE."
